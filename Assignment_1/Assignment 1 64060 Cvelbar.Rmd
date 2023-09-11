@@ -1,0 +1,34 @@
+---
+title: "Assignment 1 64060"
+author: "Nate Cvelbar"
+date: "2023-09-11"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+``` {r cars}
+#Assignment 1
+#Nate Cvelbar 
+#BA-64060
+
+#File taken online from this location: https://github.com/plotly/datasets/blob/master/us-cities-top-1k.csv
+#Loading the dataset
+cities=read.csv('C:/Users/Owner/Documents/us-cities-top-1k.csv')
+
+#Showing descriptive statistics
+summary(cities)
+
+#Changing column name, transforming the data to have population be in thousands, and rounding to whole numbers
+colnames(cities)[3] <- "Population (thousands)"
+cities[3]=cities[3]/1000
+cities$`Population (thousands)`=round(cities$`Population (thousands)`, 0)
+
+#scatter plot latitude vs longitude of USA cities
+plot(cities$`lon`, cities$lat,main = 'USA Cities Longitude vs Latitude',xlab='Longitude',ylab = 'Latitude')
+#As can be seen, this data shows a crude outline of the USA
+
+```
