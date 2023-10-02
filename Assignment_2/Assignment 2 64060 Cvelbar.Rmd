@@ -1,0 +1,127 @@
+---
+title: "Assignment 2 64060"
+author: "Nate Cvelbar"
+date: "2023-10-01"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup2, include=FALSE}
+knitr::opts_chunk$set(echo = T,
+                      results = "hide")
+```
+
+```{r}
+#install.packages("caret")
+library(caret)
+
+#install.packages("ISLR") # only install if needed
+library(ISLR)
+
+```
+
+``` {r}
+#Assignment 2
+#Nate Cvelbar 
+#BA-64060
+
+#File taken online from course Assignment 2
+#Loading the dataset
+UB=read.csv('C:/Users/Owner/Documents/UniversalBank.csv')
+
+#Mutate education and family
+
+#install.packages("fastDummies") # only install if needed
+library(fastDummies)
+UB<-dummy_cols(UB,select_columns=c("Family","Education"),remove_selected_columns = TRUE)
+
+
+#Showing descriptive statistics
+head(UB)
+summary(UB)
+
+```
+
+``` {r}
+#Normalize Data
+norm_mod<-preProcess(UB, method=c('range'))
+UB_norm<-predict(norm_mod,UB)
+
+#Dropping Zip Code and ID
+UB_norm<-UB_norm[,-1]
+UB_norm<-UB_norm[,-4]
+
+
+#Move Personal Loan to front column
+UB_norm<-UB_norm[,c(6, 1:5,7:17)]
+head(UB_norm)
+
+#Use 60% for training and rest for testing
+Index_Train<-createDataPartition(UB_norm$Age, p=0.6, list=FALSE)
+Train<-UB_norm[Index_Train,]
+Test<-UB_norm[-Index_Train,]
+```
+
+``` {r}
+
+TrainPre<-Train[,2:17]
+TestPre<-Test[,2:17]
+
+TrainLabels<-Train[,1]
+TestLabels<-Test[,1]
+
+library(class)
+
+
+Predicticted_Test_labels<-knn(TrainPre, TestPre,cl=TrainLabels,k=1)
+
+head(Predicticted_Test_labels)
+
+```
+
+
+``` {r}
+#Set up predictor 1
+Predictor1 = data.frame(Age = as.integer(40), Experience = as.integer(10), Income = as.integer(84), CCAvg = as.integer(2), Mortgage = as.integer(0), Securities.Account = as.integer(0), CD.Account = as.integer(0), Online = as.integer(1), CreditCard = as.integer(1),Family_1 = as.integer(0), Family_2 = as.integer(1), Family_3 = as.integer(0), Family_4 = as.integer(0), Education1 = as.integer(0), Education2 = as.integer(1), Education3 = as.integer(0))
+
+Pre1<-knn(TrainPre,Predictor1,cl=TrainLabels,k=1,prob=TRUE)
+attributes(Pre1)
+
+#This customer would be classified as being predicted to accept the loan
+
+```
+
+``` {r}
+
+set.seed(555)
+
+Serach_grid<- expand.grid(k=c(1:10))
+model<-train(Personal.Loan~Age+Experience+Income+CCAvg+Mortgage+Securities.Account+CD.Account+Online+CreditCard+Family_1+Family_2+Family_3+Family_4+Education_1+Education_2+Education_3, data=UB_norm, method="knn", tuneGrid=Serach_grid, preProcess='range')
+model
+
+#k=3 is best fit
+```
+
+
+``` {r}
+#Confusion Matrix
+#install.packages("gmodels")
+library("gmodels")
+CrossTable(x=TestLabels,y=Predicticted_Test_labels, prop.chisq=FALSE)
+
+```
+
+
+``` {r}
+#Set up predictor 2
+Predictor1 = data.frame(Age = as.integer(40), Experience = as.integer(10), Income = as.integer(84), CCAvg = as.integer(2), Mortgage = as.integer(0), Securities.Account = as.integer(0), CD.Account = as.integer(0), Online = as.integer(1), CreditCard = as.integer(1),Family_1 = as.integer(0), Family_2 = as.integer(1), Family_3 = as.integer(0), Family_4 = as.integer(0), Education1 = as.integer(0), Education2 = as.integer(1), Education3 = as.integer(0))
+
+Pre2<-knn(TrainPre,Predictor1,cl=TrainLabels,k=3,prob=TRUE)
+attributes(Pre2)
+
+#This customer would still be classified as being predicted to accept the loan
+
+```
