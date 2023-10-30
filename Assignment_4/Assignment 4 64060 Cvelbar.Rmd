@@ -1,0 +1,77 @@
+---
+title: "Assignment 4 64060"
+author: "Nate Cvelbar"
+date: "2023-10-29"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+dir.create("images")
+```
+
+```{r}
+#install.packages("caret")
+library(caret)
+
+#install.packages("ISLR") # only install if needed
+library(ISLR)
+
+#install.packages("tidyverse") # only install if needed
+library(tidyverse)
+#install.packages("cluster") # only install if needed
+library(cluster)
+#install.packages("factoextra") # only install if needed
+library(factoextra)
+#install.packages("NbClust") # only install if needed
+library(NbClust)
+
+
+```
+
+
+``` {r}
+#Assignment 4
+#Nate Cvelbar 
+#BA-64060
+
+#File taken online from course Assignment 4
+#Loading the dataset
+pharm=read.csv('C:/Users/Owner/Documents/Pharmaceuticals.csv')
+
+```
+
+```{r}
+set.seed(111) #Set seed
+#scale the data
+pharmN=pharm[,c(3,11)]
+df=scale(pharmN)
+distance=get_dist(df)
+fviz_dist(distance)
+```
+
+
+```{r}
+#Determine how many clusters to use. I used the elbow and silhouette methods in order to have a most accurate K value
+
+fviz_nbclust(df, kmeans, method = "wss")
+fviz_nbclust(df, kmeans, method = "silhouette")
+K=3
+
+
+```
+
+```{r}
+#Start kmeans
+k3<- kmeans(df,centers = 3, nstart = 25)
+k3$centers
+k3$size
+
+
+fviz_cluster(k3, data = df) # Visualize the output so we can see the clusters
+#The circle cluster represents small companies that are doing better than average financially. I would name this cluster 'High Potential'
+#The square cluster represents small companies who are doing poorly. I would name this cluster 'Dire Straits'
+#The triangle cluster represents large companies that are doing well. I would name this cluster 'Industry Giants'
+#Unfortunateley, I cannot see any relation between the clusters and the values in the last few columns
+
+```
